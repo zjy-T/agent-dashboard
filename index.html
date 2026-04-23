@@ -1,0 +1,1404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Depth — Agent Dashboard v5</title>
+  <style>
+    :root {
+      --bg: #0d0d0f;
+      --surface: #141418;
+      --surface2: #1a1a20;
+      --surface3: #1e1e26;
+      --border: #2a2a32;
+      --border2: #333340;
+      --accent: #6c6cff;
+      --accent2: #a78bfa;
+      --text: #e2e2e8;
+      --muted: #6b6b7a;
+      --muted2: #4a4a58;
+      --green: #34d399;
+      --yellow: #fbbf24;
+      --red: #f87171;
+      --blue: #60a5fa;
+      --orange: #fb923c;
+      --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 14px;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    /* ── Header ── */
+    header {
+      padding: 14px 28px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+      position: sticky;
+      top: 0;
+      background: var(--bg);
+      z-index: 100;
+    }
+    .header-left h1 { font-size: 18px; font-weight: 600; letter-spacing: -0.3px; }
+    .header-left h1 span { color: var(--accent2); }
+    .header-right { display: flex; align-items: center; gap: 12px; }
+    .header-meta { color: var(--muted); font-size: 12px; }
+    .refresh-btn {
+      background: rgba(108,108,255,0.12);
+      border: 1px solid rgba(108,108,255,0.3);
+      color: var(--accent2);
+      padding: 5px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+      font-family: var(--font);
+      transition: background 0.15s;
+    }
+    .refresh-btn:hover { background: rgba(108,108,255,0.22); }
+
+    /* ── Pulse Strip ── */
+    .pulse-strip {
+      position: sticky;
+      top: 53px;
+      z-index: 99;
+      background: #0f0f13;
+      border-bottom: 1px solid var(--border2);
+      display: flex;
+      align-items: center;
+      gap: 28px;
+      padding: 7px 28px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .pulse-item { display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+    .pulse-item strong { color: var(--text); font-weight: 600; }
+    .pulse-sep { width: 1px; height: 14px; background: var(--border2); }
+
+    /* ── Tab Nav ── */
+    .tab-nav {
+      display: flex;
+      gap: 0;
+      border-bottom: 1px solid var(--border);
+      padding: 0 28px;
+      background: var(--bg);
+      position: sticky;
+      top: 88px;
+      z-index: 98;
+    }
+    .tab-btn {
+      padding: 11px 18px;
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      color: var(--muted);
+      font-family: var(--font);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: color 0.15s, border-color 0.15s;
+      white-space: nowrap;
+    }
+    .tab-btn:hover { color: var(--text); }
+    .tab-btn.active { color: var(--accent2); border-bottom-color: var(--accent2); }
+
+    /* ── Tab Panels ── */
+    .tab-panel { display: none; padding: 24px 28px; }
+    .tab-panel.active { display: block; }
+
+    /* ── Section Headers ── */
+    .section-header {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 14px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* ══════════════════════════════
+       ZONE 1: CREDIT CARDS
+    ══════════════════════════════ */
+    .credit-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+    .credit-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 22px 24px;
+      position: relative;
+      overflow: hidden;
+    }
+    .credit-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+    }
+    .credit-card.anthropic::before { background: linear-gradient(90deg, #f87171, #fb923c); }
+    .credit-card.gemini::before { background: linear-gradient(90deg, #60a5fa, #a78bfa); }
+    .credit-provider {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+    .credit-hero {
+      font-size: 32px;
+      font-weight: 700;
+      letter-spacing: -0.8px;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+    .credit-card.anthropic .credit-hero { color: var(--orange); }
+    .credit-card.gemini .credit-hero { color: var(--blue); }
+    .credit-sub {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 14px;
+    }
+    .credit-sub strong { color: var(--text); font-weight: 500; }
+    .credit-bar-wrap {
+      background: var(--surface2);
+      border-radius: 4px;
+      height: 6px;
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+    .credit-bar {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.4s ease;
+    }
+    .credit-bar.green { background: var(--green); }
+    .credit-bar.yellow { background: var(--yellow); }
+    .credit-bar.red { background: var(--red); }
+    .credit-footer {
+      font-size: 11px;
+      color: var(--muted2);
+    }
+
+    /* ══════════════════════════════
+       ZONE 2: AGENT CARDS STRIP
+    ══════════════════════════════ */
+    .agent-strip {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 28px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+    .agent-strip::-webkit-scrollbar { height: 4px; }
+    .agent-strip::-webkit-scrollbar-track { background: transparent; }
+    .agent-strip::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+    .agent-strip-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 14px;
+      min-width: 18%;
+      flex: 1 0 18%;
+      max-width: 22%;
+      height: 130px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      position: relative;
+      overflow: hidden;
+    }
+    .asc-header {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      margin-bottom: 2px;
+    }
+    .asc-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .asc-dot.active { background: var(--green); box-shadow: 0 0 6px var(--green); animation: pulse 2s infinite; }
+    .asc-dot.idle { background: var(--muted2); }
+    @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.45;} }
+    .asc-name {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .asc-status {
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .asc-status.active { color: var(--green); }
+    .asc-status.idle { color: var(--muted); }
+    .asc-task {
+      font-size: 11px;
+      color: var(--muted);
+      line-height: 1.35;
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      flex: 1;
+    }
+    .asc-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      margin-top: auto;
+    }
+    .asc-meta-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 10px;
+      color: var(--muted2);
+    }
+    .asc-meta-row span { color: var(--muted); }
+
+    /* ══════════════════════════════
+       ZONE 3: LIVE ACTIVITY LOG
+    ══════════════════════════════ */
+    .log-zone {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .log-zone-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .log-zone-title {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .log-zone-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .log-updated {
+      font-size: 11px;
+      color: var(--muted2);
+    }
+    .pause-btn {
+      background: rgba(108,108,255,0.10);
+      border: 1px solid rgba(108,108,255,0.25);
+      color: var(--accent2);
+      padding: 4px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 11px;
+      font-family: var(--font);
+      transition: background 0.15s;
+    }
+    .pause-btn:hover { background: rgba(108,108,255,0.2); }
+
+    /* Live log table */
+    .log-table-wrap { overflow-x: auto; }
+    .log-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .log-table thead th {
+      padding: 8px 14px;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface2);
+    }
+    .log-table tbody tr {
+      border-bottom: 1px solid var(--border);
+      transition: background 0.1s;
+    }
+    .log-table tbody tr:last-child { border-bottom: none; }
+    .log-table tbody tr:hover { background: var(--surface2); }
+    .log-table tbody td {
+      padding: 9px 14px;
+      font-size: 12px;
+    }
+    .log-td-time { color: var(--muted); white-space: nowrap; font-size: 11px; font-variant-numeric: tabular-nums; }
+    .log-td-agent { font-weight: 600; color: var(--accent2); white-space: nowrap; }
+    .log-td-action { color: var(--text); }
+    .log-td-cost { color: var(--green); white-space: nowrap; font-variant-numeric: tabular-nums; }
+    @keyframes rowPulse {
+      0% { background: rgba(108,108,255,0.22); }
+      100% { background: transparent; }
+    }
+    .pulse-row { animation: rowPulse 1.2s ease-out forwards; }
+
+    /* ── Activity Tab (unchanged layout, updated badges) ── */
+    .activity-toolbar {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .filter-select {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-family: var(--font);
+      cursor: pointer;
+      outline: none;
+    }
+    .filter-select:focus { border-color: var(--accent); }
+    .time-filter-group { display: flex; gap: 4px; }
+    .time-btn {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      padding: 5px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-family: var(--font);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .time-btn.active, .time-btn:hover {
+      background: rgba(108,108,255,0.12);
+      border-color: rgba(108,108,255,0.3);
+      color: var(--accent2);
+    }
+
+    .panels-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .panel-header {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .panel-title {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .panel-title .dot { width: 7px; height: 7px; border-radius: 50%; }
+    .panel.working .panel-title .dot { background: var(--green); box-shadow: 0 0 6px var(--green); animation: pulse 2s infinite; }
+    .panel.finished .panel-title .dot { background: var(--blue); }
+    .panel.dormant .panel-title .dot { background: var(--muted); }
+    .panel-count {
+      background: var(--surface2);
+      color: var(--muted);
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 10px;
+    }
+    .panel-body {
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 280px;
+      overflow-y: auto;
+    }
+    .panel-body::-webkit-scrollbar { width: 4px; }
+    .panel-body::-webkit-scrollbar-track { background: transparent; }
+    .panel-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+    .log-entry {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      padding: 10px 12px;
+    }
+    .log-entry-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 4px;
+    }
+    .log-agent { font-size: 12px; font-weight: 600; color: var(--accent2); }
+    .log-time { font-size: 11px; color: var(--muted); }
+    .log-action { font-size: 12px; color: var(--text); margin-bottom: 3px; }
+    .log-detail { font-size: 11px; color: var(--muted); line-height: 1.4; }
+    .log-meta { display: flex; gap: 10px; margin-top: 6px; font-size: 11px; color: var(--muted); }
+    .log-meta span { color: var(--text); font-weight: 500; }
+    .panel-empty { padding: 20px; text-align: center; color: var(--muted); font-size: 12px; }
+
+    /* Contribution table */
+    .collapsible-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      padding: 12px 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin-bottom: 8px;
+      user-select: none;
+    }
+    .collapsible-header:hover { background: var(--surface2); }
+    .collapsible-title { font-size: 13px; font-weight: 600; }
+    .collapsible-toggle { color: var(--muted); font-size: 12px; }
+    .collapsible-body { display: none; }
+    .collapsible-body.open { display: block; }
+
+    /* ── Tables (shared) ── */
+    .table-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+    table { width: 100%; border-collapse: collapse; }
+    thead th {
+      padding: 10px 14px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface2);
+    }
+    tbody tr {
+      border-bottom: 1px solid var(--border);
+      transition: background 0.1s;
+    }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: var(--surface2); }
+    tbody td { padding: 10px 14px; font-size: 13px; }
+    .td-agent { font-weight: 600; }
+    .td-muted { color: var(--muted); font-size: 12px; }
+
+    /* ── Badges ── */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+    .badge-done    { background: rgba(52,211,153,0.12);  color: var(--green);  border: 1px solid rgba(52,211,153,0.25); }
+    .badge-queued  { background: rgba(107,107,122,0.15); color: var(--muted);  border: 1px solid var(--border); }
+    .badge-inprog  { background: rgba(96,165,250,0.12);  color: var(--blue);   border: 1px solid rgba(96,165,250,0.25); }
+    .badge-blocked { background: rgba(248,113,113,0.12); color: var(--red);    border: 1px solid rgba(248,113,113,0.25); }
+    .badge-high    { background: rgba(248,113,113,0.12); color: var(--red);    border: 1px solid rgba(248,113,113,0.25); }
+    .badge-med     { background: rgba(251,191,36,0.10);  color: var(--yellow); border: 1px solid rgba(251,191,36,0.2); }
+    .badge-low     { background: rgba(107,107,122,0.15); color: var(--muted);  border: 1px solid var(--border); }
+
+    /* ── Disclaimer ── */
+    .disclaimer {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      background: rgba(108,108,255,0.06);
+      border: 1px solid rgba(108,108,255,0.15);
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 20px;
+    }
+    .disclaimer a { color: var(--accent2); text-decoration: none; }
+    .disclaimer a:hover { text-decoration: underline; }
+
+    /* ── Team Tab Agent Cards ── */
+    .team-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 12px;
+    }
+    .team-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px 18px;
+    }
+    .team-card-top {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+    .team-avatar {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+    .team-info { flex: 1; min-width: 0; }
+    .team-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text);
+      text-transform: capitalize;
+    }
+    .team-role {
+      font-size: 11px;
+      color: var(--accent2);
+      font-weight: 500;
+    }
+    .team-last-active {
+      font-size: 11px;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+    .team-desc {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 900px) {
+      .credit-grid { grid-template-columns: 1fr 1fr; }
+      .agent-strip-card { min-width: 160px; flex: 1 0 160px; max-width: none; }
+    }
+    @media (max-width: 767px) {
+      header { padding: 12px 16px; }
+      .pulse-strip { padding: 6px 16px; gap: 14px; top: 49px; }
+      .tab-nav { padding: 0 16px; overflow-x: auto; top: 82px; }
+      .tab-btn { padding: 10px 12px; font-size: 12px; }
+      .tab-panel { padding: 16px; }
+      .credit-grid { grid-template-columns: 1fr; }
+      .agent-strip { gap: 8px; }
+      .panels-grid { grid-template-columns: 1fr; }
+      .panel-body { max-height: none; overflow-y: visible; }
+    }
+    @media (max-width: 480px) {
+      .pulse-sep { display: none; }
+      .pulse-strip { flex-wrap: wrap; gap: 8px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Header ── -->
+<header>
+  <div class="header-left">
+    <h1>🤖 The Depth — <span>Agent Dashboard</span> <small style="font-size:13px;color:var(--muted);font-weight:400;">v5</small></h1>
+  </div>
+  <div class="header-right">
+    <span class="header-meta" id="header-last-updated"></span>
+    <button class="refresh-btn" onclick="loadAll()">↻ Refresh</button>
+  </div>
+</header>
+
+<!-- ── Pulse Strip ── -->
+<div class="pulse-strip" id="pulse-strip">
+  <div class="pulse-item">🔴 HIGH todos: <strong id="pulse-high-todos">—</strong></div>
+  <div class="pulse-sep"></div>
+  <div class="pulse-item">💰 Remaining: <strong id="pulse-remaining">—</strong></div>
+  <div class="pulse-sep"></div>
+  <div class="pulse-item">🧠 Active: <strong id="pulse-active">—</strong></div>
+</div>
+
+<!-- ── Tab Nav ── -->
+<nav class="tab-nav">
+  <button class="tab-btn active" data-tab="overview">Overview</button>
+  <button class="tab-btn" data-tab="activity">Activity</button>
+  <button class="tab-btn" data-tab="todo">Todo</button>
+  <button class="tab-btn" data-tab="team">Team</button>
+</nav>
+
+<!-- ═══════════════════════════════ TAB 1: OVERVIEW ═══════════════════════════════ -->
+<section class="tab-panel active" id="tab-overview">
+
+  <!-- ZONE 1: Credit Cards -->
+  <p class="section-header">Credit Wallets</p>
+  <div class="credit-grid">
+
+    <div class="credit-card anthropic">
+      <div class="credit-provider">☁ Anthropic</div>
+      <div class="credit-hero" id="an-remaining">—</div>
+      <div class="credit-sub">Spent (MTD): <strong id="an-spent">—</strong> &nbsp;·&nbsp; Remaining: <strong id="an-remaining-sub">—</strong></div>
+      <div class="credit-bar-wrap">
+        <div class="credit-bar" id="an-bar" style="width:0%"></div>
+      </div>
+      <div class="credit-footer" id="an-footer">Updated: —</div>
+    </div>
+
+    <div class="credit-card gemini">
+      <div class="credit-provider">◈ Gemini</div>
+      <div class="credit-hero" id="gem-remaining">—</div>
+      <div class="credit-sub">Remaining</div>
+      <div class="credit-bar-wrap">
+        <div class="credit-bar" id="gem-bar" style="width:0%"></div>
+      </div>
+      <div class="credit-footer" id="gem-footer">Updated: —</div>
+    </div>
+
+  </div>
+
+  <!-- Cost rate footnote -->
+  <p style="font-size:11px;color:var(--muted2);margin-top:-18px;margin-bottom:22px;">
+    Estimates based on Claude Sonnet 4.5 pricing: $3/1M input · $15/1M output tokens
+  </p>
+
+  <!-- Cost Assumptions collapsible -->
+  <div class="collapsible-header" onclick="toggleCostAssumptions()" style="margin-bottom:24px;">
+    <span class="collapsible-title">⚙️ Cost Assumptions</span>
+    <span class="collapsible-toggle" id="cost-toggle">▶ Expand</span>
+  </div>
+  <div class="collapsible-body" id="cost-assumptions-body" style="margin-top:-20px;margin-bottom:24px;">
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:14px 18px;font-size:12px;color:var(--muted);line-height:1.8;">
+      <div><strong style="color:var(--text);">Model:</strong> Claude Sonnet 4.5</div>
+      <div><strong style="color:var(--text);">Input:</strong> $3.00 / 1M tokens</div>
+      <div><strong style="color:var(--text);">Output:</strong> $15.00 / 1M tokens</div>
+      <div style="margin-top:6px;font-size:11px;">Costs shown are estimates. Actuals at <a href="https://console.anthropic.com/settings/cost" target="_blank" style="color:var(--accent2);text-decoration:none;">console.anthropic.com/settings/cost</a></div>
+    </div>
+  </div>
+
+  <!-- ZONE 2: Agent Cards Strip -->
+  <p class="section-header">Agent Status</p>
+  <div class="agent-strip" id="agent-strip">
+    <!-- populated by JS -->
+  </div>
+
+  <!-- ZONE 2.5: Session Stats -->
+  <div id="session-stats-card" style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px 20px;margin-bottom:24px;">
+    <div style="font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border);">📊 Session Stats</div>
+    <div id="session-stats-body" style="display:grid;grid-template-columns:1fr 1fr;gap:8px 24px;font-size:12px;">
+      <div style="color:var(--muted);">Loading…</div>
+    </div>
+  </div>
+
+  <!-- ZONE 3: Live Activity Log -->
+  <div class="log-zone">
+    <div class="log-zone-header">
+      <div class="log-zone-title">Live Activity Log</div>
+      <div class="log-zone-right">
+        <span class="log-updated" id="log-last-updated">Last updated: —</span>
+        <button class="pause-btn" id="pause-btn" onclick="togglePause()">⏸ Pause</button>
+      </div>
+    </div>
+    <div class="log-table-wrap">
+      <table class="log-table">
+        <thead>
+          <tr>
+            <th>Time</th>
+            <th>Agent</th>
+            <th>Action</th>
+            <th>Duration</th>
+            <th>Cost</th>
+          </tr>
+        </thead>
+        <tbody id="live-log-body">
+          <tr><td colspan="4" style="text-align:center;color:var(--muted);padding:24px;">Loading…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</section>
+
+<!-- ═══════════════════════════════ TAB 2: ACTIVITY ═══════════════════════════════ -->
+<section class="tab-panel" id="tab-activity">
+
+  <div class="disclaimer">
+    <span>ℹ</span>
+    <span>Costs shown are estimates. See <a href="https://console.anthropic.com/settings/cost" target="_blank">Anthropic Console</a> for actuals.</span>
+  </div>
+
+  <div class="activity-toolbar">
+    <select class="filter-select" id="project-filter">
+      <option value="all">All Projects</option>
+    </select>
+    <div class="time-filter-group" id="time-filter">
+      <button class="time-btn active" data-range="day">Day</button>
+      <button class="time-btn" data-range="week">Week</button>
+      <button class="time-btn" data-range="month">Month</button>
+      <button class="time-btn" data-range="year">Year</button>
+    </div>
+  </div>
+
+  <div class="panels-grid">
+    <div class="panel working">
+      <div class="panel-header">
+        <div class="panel-title"><span class="dot"></span> Actively Working</div>
+        <span class="panel-count" id="count-working">0</span>
+      </div>
+      <div class="panel-body" id="panel-working">
+        <div class="panel-empty">No active work detected</div>
+      </div>
+    </div>
+    <div class="panel finished">
+      <div class="panel-header">
+        <div class="panel-title"><span class="dot"></span> Recently Finished</div>
+        <span class="panel-count" id="count-finished">0</span>
+      </div>
+      <div class="panel-body" id="panel-finished">
+        <div class="panel-empty">No recent completions</div>
+      </div>
+    </div>
+    <div class="panel dormant">
+      <div class="panel-header">
+        <div class="panel-title"><span class="dot"></span> Dormant</div>
+        <span class="panel-count" id="count-dormant">0</span>
+      </div>
+      <div class="panel-body" id="panel-dormant">
+        <div class="panel-empty">No dormant agents</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="collapsible-header" onclick="toggleContrib()">
+    <span class="collapsible-title">Per-Agent Contribution</span>
+    <span class="collapsible-toggle" id="contrib-toggle">▶ Expand</span>
+  </div>
+  <div class="collapsible-body" id="contrib-body">
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Agent</th>
+            <th>Events</th>
+            <th>Tokens Used</th>
+            <th>Est. Cost</th>
+            <th>Last Active</th>
+          </tr>
+        </thead>
+        <tbody id="contrib-table"></tbody>
+      </table>
+    </div>
+  </div>
+
+</section>
+
+<!-- ═══════════════════════════════ TAB 3: TODO ═══════════════════════════════ -->
+<section class="tab-panel" id="tab-todo">
+  <p class="section-header">Task Board</p>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Task</th>
+          <th>Assigned To</th>
+          <th>Status</th>
+          <th>Requester</th>
+          <th>Due Date</th>
+        </tr>
+      </thead>
+      <tbody id="todo-table">
+        <tr><td colspan="5" style="text-align:center;color:var(--muted);padding:24px;">Loading todos…</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════ TAB 4: TEAM ═══════════════════════════════ -->
+<section class="tab-panel" id="tab-team">
+  <p class="section-header">Agent Roster</p>
+  <div class="team-grid" id="team-grid">
+    <!-- populated by JS -->
+  </div>
+</section>
+
+<script>
+// ─────────────────────────────────────────────
+// CONFIG
+// ─────────────────────────────────────────────
+const AGENTS = [
+  { name: 'neil',     role: 'Lead PM',       emoji: '🌌', desc: 'Orchestrates the team, owns product decisions, sole interface to Tony.' },
+  { name: 'megamind', role: 'Architect/Dev', emoji: '🧠', desc: 'Builds and ships code — dashboards, features, infrastructure.' },
+  { name: 'picasso',  role: 'UI/UX Design',  emoji: '🎨', desc: 'Owns visual design and user experience decisions.' },
+  { name: 'margo',    role: 'Research/Risk', emoji: '📊', desc: 'Investigates unknowns, assesses risk, surfaces blind spots.' },
+  { name: 'homer',    role: 'QA/Testing',    emoji: '🔍', desc: 'Runs QA passes, regression suites, and flags defects.' },
+];
+
+// ─────────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────────
+let _log = [];
+let _todos = [];
+let _config = {};
+let _paused = false;
+let _liveLogLength = 0;
+let _refreshTimer = null;
+
+// ─────────────────────────────────────────────
+// HELPERS
+// ─────────────────────────────────────────────
+function fmtTime(ts) {
+  return new Date(ts).toLocaleString('en-CA', {
+    timeZone: 'America/Edmonton',
+    month: 'short', day: 'numeric',
+    hour: '2-digit', minute: '2-digit', hour12: false
+  });
+}
+
+function fmtHHMM(ts) {
+  return new Date(ts).toLocaleString('en-CA', {
+    timeZone: 'America/Edmonton',
+    hour: '2-digit', minute: '2-digit', hour12: false
+  });
+}
+
+function fmtHHMMSS() {
+  return new Date().toLocaleString('en-CA', {
+    timeZone: 'America/Edmonton',
+    hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
+  });
+}
+
+function timeAgo(ts) {
+  const diff = Date.now() - new Date(ts);
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return 'just now';
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h ${mins % 60}m ago`;
+  return `${Math.floor(hrs / 24)}d ago`;
+}
+
+function workTime(entries) {
+  if (!entries.length) return '—';
+  const totalSecs = entries.reduce((s, e) => s + (e.duration_seconds || 0), 0);
+  if (totalSecs === 0) return '—';
+  if (totalSecs < 3600) {
+    const m = Math.floor(totalSecs / 60);
+    const s = totalSecs % 60;
+    return `${m}m ${s}s`;
+  }
+  const h = Math.floor(totalSecs / 3600);
+  const m = Math.floor((totalSecs % 3600) / 60);
+  return `${h}h ${m}m`;
+}
+
+function barColor(ratio) {
+  if (ratio < 0.5) return 'green';
+  if (ratio < 0.8) return 'yellow';
+  return 'red';
+}
+
+function getAgentLog(agentName) {
+  return _log.filter(e => e.agent === agentName);
+}
+
+function lastActiveForAgent(agentName) {
+  const entries = getAgentLog(agentName);
+  if (!entries.length) return null;
+  return entries.reduce((latest, e) =>
+    new Date(e.timestamp) > new Date(latest.timestamp) ? e : latest
+  );
+}
+
+function isActiveAgent(agentName) {
+  const latest = lastActiveForAgent(agentName);
+  if (!latest) return false;
+  return (Date.now() - new Date(latest.timestamp)) < 3600000;
+}
+
+// ─────────────────────────────────────────────
+// TAB SWITCHING
+// ─────────────────────────────────────────────
+function switchToTab(tabName) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  const btn = document.querySelector(`.tab-btn[data-tab="${tabName}"]`);
+  if (btn) btn.classList.add('active');
+  const panel = document.getElementById('tab-' + tabName);
+  if (panel) panel.classList.add('active');
+}
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => switchToTab(btn.dataset.tab));
+});
+
+// ─────────────────────────────────────────────
+// TIME FILTER (Activity tab)
+// ─────────────────────────────────────────────
+let activeRange = 'day';
+document.getElementById('time-filter').addEventListener('click', e => {
+  if (!e.target.dataset.range) return;
+  document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('active'));
+  e.target.classList.add('active');
+  activeRange = e.target.dataset.range;
+  renderActivity();
+});
+document.getElementById('project-filter').addEventListener('change', renderActivity);
+
+function toggleContrib() {
+  const body = document.getElementById('contrib-body');
+  const toggle = document.getElementById('contrib-toggle');
+  body.classList.toggle('open');
+  toggle.textContent = body.classList.contains('open') ? '▼ Collapse' : '▶ Expand';
+}
+
+function toggleCostAssumptions() {
+  const body = document.getElementById('cost-assumptions-body');
+  const toggle = document.getElementById('cost-toggle');
+  body.classList.toggle('open');
+  toggle.textContent = body.classList.contains('open') ? '▼ Collapse' : '▶ Expand';
+}
+
+// ─────────────────────────────────────────────
+// RENDER: SESSION STATS
+// ─────────────────────────────────────────────
+function fmtDurSecs(secs) {
+  if (!secs) return '—';
+  if (secs < 3600) {
+    const m = Math.floor(secs / 60);
+    const s = secs % 60;
+    return `${m}m ${s}s`;
+  }
+  const h = Math.floor(secs / 3600);
+  const m = Math.floor((secs % 3600) / 60);
+  return `${h}h ${m}m`;
+}
+
+function renderSessionStats() {
+  const el = document.getElementById('session-stats-body');
+  if (!_log.length) {
+    el.innerHTML = '<div style="color:var(--muted);">No data yet.</div>';
+    return;
+  }
+
+  // Total tasks today
+  const todayStart = new Date(); todayStart.setHours(0,0,0,0);
+  const todayTasks = _log.filter(e => new Date(e.timestamp) >= todayStart).length;
+
+  // Most active agent
+  const agentCount = {};
+  _log.forEach(e => { agentCount[e.agent] = (agentCount[e.agent] || 0) + 1; });
+  const mostActive = Object.entries(agentCount).sort((a,b) => b[1]-a[1])[0];
+
+  // Longest task (by duration_seconds)
+  const withDur = _log.filter(e => e.duration_seconds > 0);
+  const longest = withDur.length ? withDur.reduce((a,b) => b.duration_seconds > a.duration_seconds ? b : a) : null;
+
+  // Fastest task
+  const fastest = withDur.length ? withDur.reduce((a,b) => b.duration_seconds < a.duration_seconds ? b : a) : null;
+
+  // Most expensive task
+  const withCost = _log.filter(e => e.cost_usd > 0);
+  const priciest = withCost.length ? withCost.reduce((a,b) => b.cost_usd > a.cost_usd ? b : a) : null;
+
+  const stat = (emoji, label, value) =>
+    `<div style="display:flex;align-items:baseline;gap:6px;padding:5px 0;border-bottom:1px solid var(--border);">
+      <span style="font-size:14px;">${emoji}</span>
+      <span style="color:var(--muted);min-width:140px;">${label}</span>
+      <span style="color:var(--text);font-weight:500;">${value}</span>
+    </div>`;
+
+  // Session start and duration from earliest log entry
+  const earliest = _log.reduce((min, e) => new Date(e.timestamp) < new Date(min.timestamp) ? e : min, _log[0]);
+  const sessionStartTime = fmtHHMM(earliest.timestamp);
+  const sessionElapsedMs = Date.now() - new Date(earliest.timestamp);
+  const sessionHrs = Math.floor(sessionElapsedMs / 3600000);
+  const sessionMins = Math.floor((sessionElapsedMs % 3600000) / 60000);
+  const sessionDurationStr = sessionHrs > 0 ? `${sessionHrs}h ${sessionMins}m` : `${sessionMins}m`;
+
+  el.style.display = 'block';
+  el.innerHTML = [
+    stat('🕐', 'Session started:', sessionStartTime),
+    stat('⏳', 'Session duration:', sessionDurationStr),
+    stat('🔢', 'Tasks completed today:', todayTasks),
+    stat('🏆', 'Most active agent:', mostActive ? `${mostActive[0]} (${mostActive[1]} tasks)` : '—'),
+    stat('⏱', 'Longest task:', longest ? `${longest.agent} — ${longest.action} (${fmtDurSecs(longest.duration_seconds)})` : '—'),
+    stat('⚡', 'Fastest task:', fastest ? `${fastest.agent} — ${fastest.action} (${fmtDurSecs(fastest.duration_seconds)})` : '—'),
+    stat('💸', 'Most expensive task:', priciest ? `${priciest.agent} — ${priciest.action} ($${priciest.cost_usd.toFixed(3)})` : '—'),
+  ].join('');
+}
+
+// ─────────────────────────────────────────────
+// PAUSE / RESUME
+// ─────────────────────────────────────────────
+function togglePause() {
+  _paused = !_paused;
+  const btn = document.getElementById('pause-btn');
+  btn.textContent = _paused ? '▶ Resume' : '⏸ Pause';
+  if (!_paused) {
+    renderLiveLog(); // immediate refresh on resume
+  }
+}
+
+// ─────────────────────────────────────────────
+// LOAD CONFIG
+// ─────────────────────────────────────────────
+async function loadConfig() {
+  try {
+    const r = await fetch('config.json?t=' + Date.now());
+    _config = await r.json();
+  } catch(e) {
+    console.error('Failed to load config.json', e);
+    _config = {};
+  }
+}
+
+function renderConfig() {
+  const cfg = _config;
+  if (!cfg.anthropic_starting_balance) return;
+
+  // Anthropic
+  const anSpent = cfg.anthropic_spent || 0;
+  const anStart = cfg.anthropic_starting_balance || 50;
+  const anRemaining = anStart - anSpent;
+  const anRatio = Math.min(anSpent / anStart, 1);
+
+  document.getElementById('an-remaining').textContent = '$' + anRemaining.toFixed(2);
+  document.getElementById('an-spent').textContent = '$' + anSpent.toFixed(2);
+  document.getElementById('an-remaining-sub').textContent = '$' + anRemaining.toFixed(2);
+  const anBar = document.getElementById('an-bar');
+  anBar.style.width = (anRatio * 100).toFixed(1) + '%';
+  anBar.className = 'credit-bar ' + barColor(anRatio);
+  document.getElementById('an-footer').textContent = 'Updated: ' + (cfg.last_updated || '—');
+
+  // Gemini
+  const gemRemaining = cfg.gemini_remaining || 0;
+  const gemStart = cfg.gemini_starting_balance || 50;
+  const gemSpent = gemStart - gemRemaining;
+  const gemRatio = Math.min(gemSpent / gemStart, 1);
+
+  document.getElementById('gem-remaining').textContent = 'CA$' + gemRemaining.toFixed(2);
+  const gemBar = document.getElementById('gem-bar');
+  gemBar.style.width = (gemRatio * 100).toFixed(1) + '%';
+  gemBar.className = 'credit-bar ' + barColor(gemRatio);
+  document.getElementById('gem-footer').textContent = 'Updated: ' + (cfg.last_updated || '—');
+
+  // Pulse strip: Remaining (Anthropic)
+  document.getElementById('pulse-remaining').textContent = '$' + anRemaining.toFixed(2);
+}
+
+// ─────────────────────────────────────────────
+// LOAD ACTIVITY LOG
+// ─────────────────────────────────────────────
+async function loadLog() {
+  try {
+    const r = await fetch('activity-log.json?t=' + Date.now());
+    _log = await r.json();
+  } catch(e) {
+    console.error('Failed to load activity-log.json', e);
+  }
+}
+
+// ─────────────────────────────────────────────
+// RENDER: AGENT STRIP (Zone 2)
+// ─────────────────────────────────────────────
+function renderAgentStrip() {
+  const strip = document.getElementById('agent-strip');
+  strip.innerHTML = AGENTS.map(a => {
+    const entries = getAgentLog(a.name);
+    const sorted = [...entries].sort((x,y) => new Date(y.timestamp) - new Date(x.timestamp));
+    const latest = sorted[0] || null;
+    const isActive = latest ? (Date.now() - new Date(latest.timestamp)) < 3600000 : false;
+
+    const currentTask = latest ? (latest.detail || latest.action || '—').substring(0, 40) + (latest.detail && latest.detail.length > 40 ? '…' : '') : 'No activity recorded';
+    const costTotal = entries.reduce((s,e) => s + (e.cost_usd || 0), 0);
+    const tokensTotal = entries.reduce((s,e) => s + (e.tokens_used || 0), 0);
+    const wt = workTime(entries);
+
+    return `<div class="agent-strip-card">
+      <div class="asc-header">
+        <div class="asc-dot ${isActive ? 'active' : 'idle'}"></div>
+        <div class="asc-name">${a.emoji} ${a.name}</div>
+      </div>
+      <div class="asc-status ${isActive ? 'active' : 'idle'}">${isActive ? 'Active' : 'Idle'}</div>
+      <div class="asc-task">${currentTask}</div>
+      <div class="asc-meta">
+        <div class="asc-meta-row">Cost: <span>$${costTotal.toFixed(3)}</span></div>
+        <div class="asc-meta-row">Tokens: <span>${tokensTotal.toLocaleString()}</span></div>
+        <div class="asc-meta-row">Work time: <span>${wt}</span></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ─────────────────────────────────────────────
+// RENDER: LIVE LOG (Zone 3)
+// ─────────────────────────────────────────────
+function renderLiveLog() {
+  if (_paused) return;
+  const sorted = [..._log].sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));
+  const entries = sorted.slice(0, 15);
+  const tbody = document.getElementById('live-log-body');
+  const prevLength = _liveLogLength;
+  const newLength = _log.length;
+
+  tbody.innerHTML = entries.map((e, i) => {
+    const isNew = (i === 0 && newLength > prevLength && prevLength > 0);
+    const dur = e.duration_seconds ? workTime([e]) : '—';
+    return `<tr class="${isNew ? 'pulse-row' : ''}">
+      <td class="log-td-time">${fmtHHMM(e.timestamp)}</td>
+      <td class="log-td-agent">${e.agent}</td>
+      <td class="log-td-action">${e.detail || e.action}</td>
+      <td class="log-td-cost" style="color:var(--muted)">${dur}</td>
+      <td class="log-td-cost">${e.cost_usd != null ? '$' + e.cost_usd.toFixed(3) : '—'}</td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:24px;">No entries</td></tr>';
+
+  _liveLogLength = newLength;
+
+  const ts = fmtHHMMSS();
+  document.getElementById('log-last-updated').textContent = 'Last updated: ' + ts;
+  document.getElementById('header-last-updated').textContent = 'Updated: ' + ts;
+}
+
+// ─────────────────────────────────────────────
+// RENDER: PULSE STRIP
+// ─────────────────────────────────────────────
+function renderPulseStrip() {
+  const activeCount = AGENTS.filter(a => isActiveAgent(a.name)).length;
+  document.getElementById('pulse-active').textContent = activeCount;
+
+  const highCount = _todos.filter(t => t.priority === 'high' && t.status !== 'done').length;
+  document.getElementById('pulse-high-todos').textContent = highCount;
+}
+
+// ─────────────────────────────────────────────
+// RENDER: ACTIVITY TAB
+// ─────────────────────────────────────────────
+function filterLog() {
+  const proj = document.getElementById('project-filter').value;
+  const now = new Date();
+  const ranges = {
+    day: 24 * 60 * 60 * 1000,
+    week: 7 * 24 * 60 * 60 * 1000,
+    month: 30 * 24 * 60 * 60 * 1000,
+    year: 365 * 24 * 60 * 60 * 1000
+  };
+  return _log.filter(e => {
+    const t = new Date(e.timestamp);
+    const inRange = (now - t) <= ranges[activeRange];
+    const inProject = proj === 'all' || e.project === proj;
+    return inRange && inProject;
+  });
+}
+
+function makeLogEntry(e) {
+  return `<div class="log-entry">
+    <div class="log-entry-top">
+      <span class="log-agent">${e.agent}</span>
+      <span class="log-time">${fmtTime(e.timestamp)}</span>
+    </div>
+    <div class="log-action">${e.action}</div>
+    <div class="log-detail">${e.detail || ''}</div>
+    ${(e.tokens_used || e.cost_usd) ? `<div class="log-meta">${e.tokens_used ? `Tokens: <span>${e.tokens_used.toLocaleString()}</span>` : ''} ${e.cost_usd ? `Cost: <span>$${e.cost_usd.toFixed(3)}</span>` : ''}</div>` : ''}
+  </div>`;
+}
+
+function renderActivity() {
+  const filtered = filterLog();
+  const now = Date.now();
+  const oneHour = 3600000;
+
+  const working = filtered.filter(e => e.status === 'in-progress' || (now - new Date(e.timestamp) < oneHour && e.status !== 'done'));
+  const finished = filtered.filter(e => e.status === 'done');
+  const dormantAgents = AGENTS.filter(a => {
+    const agentLogs = _log.filter(e => e.agent === a.name);
+    if (!agentLogs.length) return true;
+    const latest = Math.max(...agentLogs.map(e => new Date(e.timestamp)));
+    return (now - latest) > oneHour;
+  });
+  const dormantEntries = dormantAgents.map(a => {
+    const last = [..._log.filter(e => e.agent === a.name)].sort((x,y) => new Date(y.timestamp) - new Date(x.timestamp))[0];
+    const lastActive = last ? timeAgo(last.timestamp) : 'never';
+    return `<div class="log-entry">
+      <div class="log-entry-top">
+        <span class="log-agent">${a.emoji} ${a.name}</span>
+        <span class="log-time">last active: ${lastActive}</span>
+      </div>
+      <div class="log-detail">${last ? last.detail : 'No recorded activity'}</div>
+    </div>`;
+  });
+
+  document.getElementById('count-working').textContent = working.length;
+  document.getElementById('count-finished').textContent = finished.length;
+  document.getElementById('count-dormant').textContent = dormantAgents.length;
+
+  document.getElementById('panel-working').innerHTML = working.length
+    ? working.map(makeLogEntry).join('')
+    : '<div class="panel-empty">No active work detected</div>';
+  document.getElementById('panel-finished').innerHTML = finished.length
+    ? finished.map(makeLogEntry).join('')
+    : '<div class="panel-empty">No completions in range</div>';
+  document.getElementById('panel-dormant').innerHTML = dormantEntries.length
+    ? dormantEntries.join('')
+    : '<div class="panel-empty">All agents active</div>';
+
+  // Populate project filter
+  const projects = [...new Set(_log.map(e => e.project).filter(Boolean))];
+  const sel = document.getElementById('project-filter');
+  const cur = sel.value;
+  sel.innerHTML = '<option value="all">All Projects</option>';
+  projects.forEach(p => {
+    const opt = document.createElement('option');
+    opt.value = p; opt.textContent = p;
+    if (p === cur) opt.selected = true;
+    sel.appendChild(opt);
+  });
+
+  // Contrib table
+  const byAgent = {};
+  _log.forEach(e => {
+    if (!byAgent[e.agent]) byAgent[e.agent] = { events: 0, tokens: 0, cost: 0, last: null };
+    byAgent[e.agent].events++;
+    byAgent[e.agent].tokens += (e.tokens_used || 0);
+    byAgent[e.agent].cost += (e.cost_usd || 0);
+    if (!byAgent[e.agent].last || e.timestamp > byAgent[e.agent].last) byAgent[e.agent].last = e.timestamp;
+  });
+  const rows = Object.entries(byAgent)
+    .sort((a,b) => b[1].tokens - a[1].tokens)
+    .map(([agent, d]) => `<tr>
+      <td class="td-agent">${agent}</td>
+      <td>${d.events}</td>
+      <td>${d.tokens.toLocaleString()}</td>
+      <td>$${d.cost.toFixed(3)}</td>
+      <td class="td-muted">last active: ${d.last ? timeAgo(d.last) : '—'}</td>
+    </tr>`).join('');
+  document.getElementById('contrib-table').innerHTML = rows || '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:16px;">No data</td></tr>';
+}
+
+// ─────────────────────────────────────────────
+// RENDER: TODO TAB
+// ─────────────────────────────────────────────
+async function loadTodo() {
+  try {
+    const r = await fetch('todo.json?t=' + Date.now());
+    _todos = await r.json();
+  } catch(e) {
+    console.error('Failed to load todo.json', e);
+    _todos = [];
+  }
+}
+
+function renderTodo() {
+  const tbody = document.getElementById('todo-table');
+  if (!_todos.length) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:24px;">No todos found.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = _todos.map(t => {
+    const status = t.status || 'queued';
+    const stsCls = {
+      done:         'badge-done',
+      'in-progress':'badge-inprog',
+      blocked:      'badge-blocked',
+      queued:       'badge-queued',
+      open:         'badge-queued'
+    }[status] || 'badge-queued';
+    const stsLabel = {
+      done:         'done',
+      'in-progress':'in-progress',
+      blocked:      'blocked',
+      queued:       'queued',
+      open:         'queued'
+    }[status] || status;
+    return `<tr>
+      <td>${t.task}</td>
+      <td class="td-agent">${t.assigned}</td>
+      <td><span class="badge ${stsCls}">${stsLabel}</span></td>
+      <td class="td-muted">${t.requester || '—'}</td>
+      <td class="td-muted">${t.due || '—'}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ─────────────────────────────────────────────
+// RENDER: TEAM TAB
+// ─────────────────────────────────────────────
+function renderTeam() {
+  const grid = document.getElementById('team-grid');
+  grid.innerHTML = AGENTS.map(a => {
+    const latest = lastActiveForAgent(a.name);
+    const lastActive = latest ? timeAgo(latest.timestamp) : 'never';
+    const isActive = latest ? (Date.now() - new Date(latest.timestamp)) < 3600000 : false;
+    return `<div class="team-card">
+      <div class="team-card-top">
+        <div class="team-avatar">${a.emoji}</div>
+        <div class="team-info">
+          <div class="team-name">${a.name}</div>
+          <div class="team-role">${a.role}</div>
+        </div>
+      </div>
+      <div class="team-last-active">last active: ${lastActive}</div>
+      <div class="team-desc">${a.desc}</div>
+    </div>`;
+  }).join('');
+}
+
+// ─────────────────────────────────────────────
+// LOAD ALL
+// ─────────────────────────────────────────────
+async function loadAll() {
+  await Promise.all([loadConfig(), loadLog(), loadTodo()]);
+  renderConfig();
+  renderAgentStrip();
+  renderLiveLog();
+  renderPulseStrip();
+  renderActivity();
+  renderTodo();
+  renderTeam();
+  renderSessionStats();
+}
+
+// ─────────────────────────────────────────────
+// AUTO-REFRESH (30s)
+// ─────────────────────────────────────────────
+async function liveRefresh() {
+  await Promise.all([loadLog(), loadConfig(), loadTodo()]);
+  renderLiveLog();
+  renderAgentStrip();
+  renderPulseStrip();
+  renderConfig();
+  renderSessionStats();
+}
+
+loadAll().then(() => {
+  setInterval(liveRefresh, 30000);
+});
+</script>
+</body>
+</html>

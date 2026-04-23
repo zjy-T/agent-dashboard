@@ -1,0 +1,47 @@
+[
+  {
+    "id": 1,
+    "task": "Fix Gemini wallet card \u2014 add Updated timestamp",
+    "assigned": "megamind",
+    "priority": "low",
+    "status": "queued",
+    "due": "2026-04-25",
+    "requester": "tony"
+  },
+  {
+    "id": 2,
+    "task": "Implement live cost API pull from Anthropic Usage API",
+    "assigned": "megamind",
+    "priority": "high",
+    "status": "queued",
+    "due": "2026-04-30",
+    "requester": "tony"
+  },
+  {
+    "id": 3,
+    "task": "Swap panel order: Active left, Dormant right",
+    "assigned": "megamind",
+    "priority": "low",
+    "status": "queued",
+    "due": "2026-04-25",
+    "requester": "picasso"
+  },
+  {
+    "id": 4,
+    "task": "Auto-write agent status to activity-log.json on task completion",
+    "assigned": "neil",
+    "priority": "high",
+    "status": "queued",
+    "due": "2026-04-28",
+    "requester": "neil"
+  },
+  {
+    "id": 5,
+    "task": "Ambient awareness model \u2014 event-driven agent spawning (agents self-activate on relevant channel messages)",
+    "assigned": "neil",
+    "priority": "high",
+    "status": "queued",
+    "due": "2026-04-25",
+    "requester": "tony"
+  }
+]
