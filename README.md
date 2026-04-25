@@ -40,6 +40,11 @@ python3 -m http.server 8081
 # Open http://localhost:8081
 ```
 
+## Core Docs
+- `docs/product.md`
+- `docs/workflow.md`
+- `docs/architecture.md`
+
 ## Built With
 
 - Vanilla HTML/CSS/JS — no frameworks, no build step
