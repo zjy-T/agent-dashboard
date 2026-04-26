@@ -560,7 +560,6 @@
       border: 1px solid rgba(255,255,255,0.08);
       border-radius: 12px;
       padding: 18px 20px;
-      min-height: 180px;
       display: flex;
       flex-direction: column;
       box-shadow: 0 2px 12px rgba(0,0,0,0.3);
@@ -654,6 +653,21 @@
     }
     .team-field-value.model { font-family: monospace; font-size: 11px; color: var(--accent2); }
     .team-field-value.tokens { color: var(--blue); font-variant-numeric: tabular-nums; font-weight: 500; }
+    .team-role {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #8c99b8;
+      margin-top: 4px;
+    }
+    .team-about {
+      font-size: 10px;
+      color: #8c99b8;
+      font-style: italic;
+      line-height: 1.45;
+      margin-top: 3px;
+    }
 
     /* ── Responsive ── */
     @media (max-width: 900px) {
@@ -905,11 +919,11 @@
 // CONFIG
 // ─────────────────────────────────────────────
 const AGENTS = [
-  { name: 'neil',     role: 'Lead PM',       emoji: '🌌', desc: 'Orchestrates the team, owns product decisions, sole interface to Tony.', avatar: 'https://cdn.discordapp.com/avatars/1496367229124612196/c7bcbb00faddd861ecb56c36bc0313c7.png', model: 'claude-sonnet-4-6' },
-  { name: 'megamind', role: 'Architect/Dev', emoji: '🧠', desc: 'Builds and ships code — dashboards, features, infrastructure.',          avatar: 'https://cdn.discordapp.com/avatars/1496384933495701566/5648c71a1a4c44a261bd3dfd74a459b5.png', model: 'claude-sonnet-4-6' },
-  { name: 'picasso',  role: 'UI/UX Design',  emoji: '🎨', desc: 'Owns visual design and user experience decisions.',                       avatar: 'https://cdn.discordapp.com/avatars/1496574015857496115/ce636fd103a7cd0d5237f57faf6104d0.png', model: 'gemini/figma' },
-  { name: 'margo',    role: 'Research/Risk', emoji: '📊', desc: 'Investigates unknowns, assesses risk, surfaces blind spots.',             avatar: 'https://cdn.discordapp.com/avatars/1496573415086096454/a95a24a49dd1d5e84b44dfc3c0ecbdde.png', model: 'claude-sonnet-4-6' },
-  { name: 'homer',    role: 'QA/Testing',    emoji: '🔍', desc: 'Runs QA passes, regression suites, and flags defects.',                   avatar: 'https://cdn.discordapp.com/avatars/1496574598307909815/f1a7b4d3b5ed8d7d1e4a0f3e8e7c6b5a.png', model: 'claude-sonnet-4-6' },
+  { name: 'neil',     role: 'Lead PM',       emoji: '🌌', desc: 'Orchestrates the team, owns product decisions, sole interface to Tony.', avatar: 'https://cdn.discordapp.com/avatars/1496367229124612196/c7bcbb00faddd861ecb56c36bc0313c7.png', model: 'claude-sonnet-4-6',     about: "Lead PM and cosmic orchestrator. Synthesizes team input, owns product decisions, and serves as Tony's single point of contact — with the intellectual showmanship of a scientist and the precision of a mission controller." },
+  { name: 'megamind', role: 'Architect/Dev', emoji: '🧠', desc: 'Builds and ships code — dashboards, features, infrastructure.',          avatar: 'https://cdn.discordapp.com/avatars/1496384933495701566/5648c71a1a4c44a261bd3dfd74a459b5.png', model: 'claude-sonnet-4-6',     about: "Architect and engineer. Builds and ships code with the enthusiasm of someone who just discovered electricity. Dispatched via Claude Code; has never met a system he didn't want to redesign." },
+  { name: 'picasso',  role: 'UI/UX Design',  emoji: '🎨', desc: 'Owns visual design and user experience decisions.',                       avatar: 'https://cdn.discordapp.com/avatars/1496574015857496115/ce636fd103a7cd0d5237f57faf6104d0.png', model: 'google/gemini-3-flash', about: "UI/UX designer and visual taste-maker. Opinionated, fast, and occasionally dramatic about kerning. Owns every pixel from wireframe to visual QA." },
+  { name: 'margo',    role: 'Research/Risk', emoji: '📊', desc: 'Investigates unknowns, assesses risk, surfaces blind spots.',             avatar: 'https://cdn.discordapp.com/avatars/1496573415086096454/ace3d996ed4837927566e35cc6a160a8.png', model: 'google/gemini-3-flash', about: "Research and risk. The sharpest skeptic in the room — she will find the edge case you forgot to think about, then remind you how much it would have cost. Keeps the team honest." },
+  { name: 'homer',    role: 'QA/Testing',    emoji: '🔍', desc: 'Runs QA passes, regression suites, and flags defects.',                   avatar: 'https://cdn.discordapp.com/avatars/1496574598307909815/1ef1544ebe4d95999b2839de4f3e8253.png', model: 'google/gemini-3-flash', about: "QA and testing. Loveable, thorough, and powered by donuts. Will find your bug, document it warmly, and somehow make you feel good about fixing it." },
 ];
 
 // ─────────────────────────────────────────────
@@ -1400,6 +1414,15 @@ function renderTodo() {
 }
 
 // ─────────────────────────────────────────────
+// HELPERS: MODEL DISPLAY
+// ─────────────────────────────────────────────
+function fmtModel(model) {
+  if (model === 'claude-sonnet-4-6') return 'Claude Sonnet 4.6';
+  if (model === 'google/gemini-3-flash') return 'Gemini 3 Flash';
+  return model;
+}
+
+// ─────────────────────────────────────────────
 // RENDER: TEAM TAB
 // ─────────────────────────────────────────────
 function renderTeam() {
@@ -1447,18 +1470,20 @@ function renderTeam() {
         <div class="team-name-block">
           <div class="team-name">${a.name}</div>
           <div class="team-status ${statusClass}"><span class="status-dot"></span>${statusLabel}</div>
+          <div class="team-role">${a.role}</div>
+          <div class="team-about">${a.about}</div>
         </div>
         <div class="team-avatar-wrap">${avatarHtml}</div>
       </div>
       <hr class="team-divider">
       <div class="team-fields">
-        <div class="team-field">
+        ${statusClass === 'status-working' ? `<div class="team-field">
           <div class="team-field-label">Current Task</div>
           <div class="team-field-value task">${currentTask}</div>
-        </div>
+        </div>` : ''}
         <div class="team-field">
           <div class="team-field-label">Model</div>
-          <div class="team-field-value model">${a.model}</div>
+          <div class="team-field-value model">${fmtModel(a.model)}</div>
         </div>
         <div class="team-field">
           <div class="team-field-label">7-Day Tokens</div>
