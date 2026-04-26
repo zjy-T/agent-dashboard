@@ -549,36 +549,74 @@
     .disclaimer a { color: var(--accent2); text-decoration: none; }
     .disclaimer a:hover { text-decoration: underline; }
 
-    /* ── Team Tab Agent Cards (Redesigned) ── */
+    /* ── Team Tab Agent Cards (Figma v1 Redesign) ── */
     .team-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
       gap: 16px;
     }
     .team-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
+      background: #1a1f2e;
+      border: 1px solid rgba(255,255,255,0.08);
       border-radius: 12px;
-      padding: 20px;
+      padding: 18px 20px;
+      min-height: 180px;
+      display: flex;
+      flex-direction: column;
       box-shadow: 0 2px 12px rgba(0,0,0,0.3);
       transition: border-color 0.15s, box-shadow 0.15s;
     }
     .team-card:hover {
-      border-color: var(--border2);
+      border-color: rgba(255,255,255,0.15);
       box-shadow: 0 4px 20px rgba(0,0,0,0.4);
     }
+    .team-card.status-dormant { background: #161b27; }
     .team-card-header {
       display: flex;
-      align-items: center;
+      align-items: flex-start;
+      justify-content: space-between;
       gap: 12px;
-      margin-bottom: 16px;
     }
+    .team-name-block { flex: 1; min-width: 0; }
+    .team-name {
+      font-size: 18px;
+      font-weight: 700;
+      color: #ffffff;
+      text-transform: capitalize;
+      margin-bottom: 5px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .team-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+    .team-status .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .team-status.status-working { color: #ff991a; }
+    .team-status.status-working .status-dot {
+      background: #ff991a;
+      box-shadow: 0 0 6px #ff991a;
+      animation: pulse 2s infinite;
+    }
+    .team-status.status-online { color: #36b27d; }
+    .team-status.status-online .status-dot { background: #36b27d; }
+    .team-status.status-dormant { color: #66708c; }
+    .team-status.status-dormant .status-dot { background: #66708c; }
     .team-avatar-wrap { position: relative; flex-shrink: 0; }
     .team-avatar-img {
       width: 48px;
       height: 48px;
       border-radius: 50%;
-      border: 2px solid var(--border2);
+      border: 1px solid rgba(255,255,255,0.15);
       object-fit: cover;
       display: block;
     }
@@ -586,70 +624,29 @@
       width: 48px;
       height: 48px;
       border-radius: 50%;
-      background: var(--surface2);
-      border: 2px solid var(--border2);
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.15);
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 22px;
     }
-    .team-name-block { flex: 1; min-width: 0; }
-    .team-name {
-      font-size: 15px;
-      font-weight: 700;
-      color: var(--text);
-      text-transform: capitalize;
-      margin-bottom: 2px;
+    .team-divider {
+      border: none;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      margin: 12px 0;
     }
-    .team-role { font-size: 11px; color: var(--accent2); font-weight: 500; }
-    .team-status-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      padding: 3px 9px;
-      border-radius: 12px;
-      font-size: 11px;
-      font-weight: 600;
-      white-space: nowrap;
-      flex-shrink: 0;
-    }
-    .team-status-badge .status-dot {
-      width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0;
-    }
-    .team-status-badge.working {
-      background: rgba(251,146,60,0.12);
-      border: 1px solid rgba(251,146,60,0.25);
-      color: var(--orange);
-    }
-    .team-status-badge.working .status-dot {
-      background: var(--orange);
-      box-shadow: 0 0 6px var(--orange);
-      animation: pulse 2s infinite;
-    }
-    .team-status-badge.online {
-      background: rgba(52,211,153,0.10);
-      border: 1px solid rgba(52,211,153,0.22);
-      color: var(--green);
-    }
-    .team-status-badge.online .status-dot { background: var(--green); }
-    .team-status-badge.offline {
-      background: rgba(107,107,122,0.12);
-      border: 1px solid var(--border);
-      color: var(--muted);
-    }
-    .team-status-badge.offline .status-dot { background: var(--muted2); }
-    .team-fields { display: flex; flex-direction: column; gap: 10px; }
+    .team-fields { display: flex; flex-direction: column; gap: 8px; flex: 1; }
     .team-field { display: flex; flex-direction: column; gap: 2px; }
     .team-field-label {
-      font-size: 10px;
-      font-weight: 600;
-      letter-spacing: 0.07em;
+      font-size: 9px;
+      font-weight: 400;
+      letter-spacing: 0.08em;
       text-transform: uppercase;
-      color: var(--muted2);
+      color: #8c99b8;
     }
-    .team-field-value { font-size: 12px; color: var(--text); line-height: 1.4; }
+    .team-field-value { font-size: 11px; color: #d9deeb; line-height: 1.4; }
     .team-field-value.task {
-      color: var(--muted);
       display: -webkit-box;
       -webkit-line-clamp: 2;
       -webkit-box-orient: vertical;
@@ -1408,8 +1405,8 @@ function renderTodo() {
 function renderTeam() {
   const grid = document.getElementById('team-grid');
   const now = Date.now();
-  const TEN_MIN  = 600000;
-  const ONE_HOUR = 3600000;
+  const TEN_MIN    = 600000;
+  const ONE_HOUR   = 3600000;
   const SEVEN_DAYS = 7 * 24 * ONE_HOUR;
 
   grid.innerHTML = AGENTS.map(a => {
@@ -1417,43 +1414,43 @@ function renderTeam() {
     const sorted  = [...entries].sort((x,y) => new Date(y.timestamp) - new Date(x.timestamp));
     const latest  = sorted[0] || null;
 
-    // Status
+    // Status — derived from most recent entry timestamp and status field
     let statusClass, statusLabel;
     if (latest) {
       const age = now - new Date(latest.timestamp);
-      if (age < TEN_MIN)  { statusClass = 'working'; statusLabel = 'Working'; }
-      else if (age < ONE_HOUR) { statusClass = 'online';  statusLabel = 'Online'; }
-      else                { statusClass = 'offline'; statusLabel = 'Offline'; }
+      if (age < TEN_MIN && latest.status === 'active') { statusClass = 'status-working'; statusLabel = 'Working'; }
+      else if (age < ONE_HOUR)                         { statusClass = 'status-online';  statusLabel = 'Online'; }
+      else                                             { statusClass = 'status-dormant'; statusLabel = 'Dormant'; }
     } else {
-      statusClass = 'offline'; statusLabel = 'Offline';
+      statusClass = 'status-dormant'; statusLabel = 'Dormant';
     }
 
-    // Current task
-    let currentTask = 'Idle';
-    if (latest && (now - new Date(latest.timestamp)) < ONE_HOUR) {
-      const raw = latest.detail || latest.action || '';
-      currentTask = raw.length > 100 ? raw.substring(0, 100) + '…' : (raw || 'Idle');
-    }
+    // Current task — show latest regardless of recency
+    const raw = latest ? (latest.detail || latest.action || '') : '';
+    const currentTask = raw.length > 100 ? raw.substring(0, 100) + '…' : (raw || '—');
 
-    // 7-day tokens
+    // 7-day tokens, formatted as "142k tokens"
     const tokens7d = entries
       .filter(e => (now - new Date(e.timestamp)) < SEVEN_DAYS)
       .reduce((s, e) => s + (e.tokens_used || 0), 0);
+    const tokensFormatted = tokens7d >= 1000
+      ? Math.round(tokens7d / 1000) + 'k tokens'
+      : tokens7d + ' tokens';
 
     // Avatar with emoji fallback
     const avatarHtml = a.avatar
       ? `<img class="team-avatar-img" src="${a.avatar}" alt="${a.name}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="team-avatar-fallback" style="display:none">${a.emoji}</div>`
       : `<div class="team-avatar-fallback">${a.emoji}</div>`;
 
-    return `<div class="team-card">
+    return `<div class="team-card ${statusClass}">
       <div class="team-card-header">
-        <div class="team-avatar-wrap">${avatarHtml}</div>
         <div class="team-name-block">
           <div class="team-name">${a.name}</div>
-          <div class="team-role">${a.role}</div>
+          <div class="team-status ${statusClass}"><span class="status-dot"></span>${statusLabel}</div>
         </div>
-        <span class="team-status-badge ${statusClass}"><span class="status-dot"></span>${statusLabel}</span>
+        <div class="team-avatar-wrap">${avatarHtml}</div>
       </div>
+      <hr class="team-divider">
       <div class="team-fields">
         <div class="team-field">
           <div class="team-field-label">Current Task</div>
@@ -1465,7 +1462,7 @@ function renderTeam() {
         </div>
         <div class="team-field">
           <div class="team-field-label">7-Day Tokens</div>
-          <div class="team-field-value tokens">${tokens7d.toLocaleString()}</div>
+          <div class="team-field-value tokens">${tokensFormatted}</div>
         </div>
       </div>
     </div>`;
