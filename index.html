@@ -1418,7 +1418,7 @@ function renderTeam() {
     let statusClass, statusLabel;
     if (latest) {
       const age = now - new Date(latest.timestamp);
-      if (age < TEN_MIN && latest.status === 'active') { statusClass = 'status-working'; statusLabel = 'Working'; }
+      if (age < TEN_MIN && (latest.status === 'in-progress' || latest.status === 'active')) { statusClass = 'status-working'; statusLabel = 'Working'; }
       else if (age < ONE_HOUR)                         { statusClass = 'status-online';  statusLabel = 'Online'; }
       else                                             { statusClass = 'status-dormant'; statusLabel = 'Dormant'; }
     } else {
