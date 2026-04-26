@@ -939,6 +939,7 @@ function lastActiveForAgent(agentName) {
 function isActiveAgent(agentName) {
   const latest = lastActiveForAgent(agentName);
   if (!latest) return false;
+  if (latest.status === 'done') return false;
   return (Date.now() - new Date(latest.timestamp)) < 3600000;
 }
 
@@ -1133,7 +1134,7 @@ function renderAgentStrip() {
     const entries = getAgentLog(a.name);
     const sorted = [...entries].sort((x,y) => new Date(y.timestamp) - new Date(x.timestamp));
     const latest = sorted[0] || null;
-    const isActive = latest ? (Date.now() - new Date(latest.timestamp)) < 3600000 : false;
+    const isActive = latest && latest.status !== 'done' ? (Date.now() - new Date(latest.timestamp)) < 3600000 : false;
 
     const currentTask = latest ? (latest.detail || latest.action || '—').substring(0, 40) + (latest.detail && latest.detail.length > 40 ? '…' : '') : 'No activity recorded';
     const costTotal = entries.reduce((s,e) => s + (e.cost_usd || 0), 0);
@@ -1239,8 +1240,9 @@ function renderActivity() {
   const dormantAgents = AGENTS.filter(a => {
     const agentLogs = _log.filter(e => e.agent === a.name);
     if (!agentLogs.length) return true;
-    const latest = Math.max(...agentLogs.map(e => new Date(e.timestamp)));
-    return (now - latest) > oneHour;
+    const latestEntry = [...agentLogs].sort((x,y) => new Date(y.timestamp) - new Date(x.timestamp))[0];
+    if (latestEntry.status === 'done') return true;
+    return (now - new Date(latestEntry.timestamp)) > oneHour;
   });
   const dormantEntries = dormantAgents.map(a => {
     const last = [..._log.filter(e => e.agent === a.name)].sort((x,y) => new Date(y.timestamp) - new Date(x.timestamp))[0];
@@ -1354,7 +1356,7 @@ function renderTeam() {
   grid.innerHTML = AGENTS.map(a => {
     const latest = lastActiveForAgent(a.name);
     const lastActive = latest ? timeAgo(latest.timestamp) : 'never';
-    const isActive = latest ? (Date.now() - new Date(latest.timestamp)) < 3600000 : false;
+    const isActive = latest && latest.status !== 'done' ? (Date.now() - new Date(latest.timestamp)) < 3600000 : false;
     return `<div class="team-card">
       <div class="team-card-top">
         <div class="team-avatar">${a.emoji}</div>
