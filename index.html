@@ -549,58 +549,114 @@
     .disclaimer a { color: var(--accent2); text-decoration: none; }
     .disclaimer a:hover { text-decoration: underline; }
 
-    /* ── Team Tab Agent Cards ── */
+    /* ── Team Tab Agent Cards (Redesigned) ── */
     .team-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-      gap: 12px;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
     }
     .team-card {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 16px 18px;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+      transition: border-color 0.15s, box-shadow 0.15s;
     }
-    .team-card-top {
+    .team-card:hover {
+      border-color: var(--border2);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+    }
+    .team-card-header {
       display: flex;
       align-items: center;
-      gap: 10px;
-      margin-bottom: 8px;
+      gap: 12px;
+      margin-bottom: 16px;
     }
-    .team-avatar {
-      width: 38px;
-      height: 38px;
+    .team-avatar-wrap { position: relative; flex-shrink: 0; }
+    .team-avatar-img {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      border: 2px solid var(--border2);
+      object-fit: cover;
+      display: block;
+    }
+    .team-avatar-fallback {
+      width: 48px;
+      height: 48px;
       border-radius: 50%;
       background: var(--surface2);
-      border: 1px solid var(--border);
+      border: 2px solid var(--border2);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 18px;
-      flex-shrink: 0;
+      font-size: 22px;
     }
-    .team-info { flex: 1; min-width: 0; }
+    .team-name-block { flex: 1; min-width: 0; }
     .team-name {
-      font-size: 14px;
+      font-size: 15px;
       font-weight: 700;
       color: var(--text);
       text-transform: capitalize;
+      margin-bottom: 2px;
     }
-    .team-role {
+    .team-role { font-size: 11px; color: var(--accent2); font-weight: 500; }
+    .team-status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 9px;
+      border-radius: 12px;
       font-size: 11px;
-      color: var(--accent2);
-      font-weight: 500;
+      font-weight: 600;
+      white-space: nowrap;
+      flex-shrink: 0;
     }
-    .team-last-active {
-      font-size: 11px;
+    .team-status-badge .status-dot {
+      width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0;
+    }
+    .team-status-badge.working {
+      background: rgba(251,146,60,0.12);
+      border: 1px solid rgba(251,146,60,0.25);
+      color: var(--orange);
+    }
+    .team-status-badge.working .status-dot {
+      background: var(--orange);
+      box-shadow: 0 0 6px var(--orange);
+      animation: pulse 2s infinite;
+    }
+    .team-status-badge.online {
+      background: rgba(52,211,153,0.10);
+      border: 1px solid rgba(52,211,153,0.22);
+      color: var(--green);
+    }
+    .team-status-badge.online .status-dot { background: var(--green); }
+    .team-status-badge.offline {
+      background: rgba(107,107,122,0.12);
+      border: 1px solid var(--border);
       color: var(--muted);
-      margin-bottom: 8px;
     }
-    .team-desc {
-      font-size: 12px;
+    .team-status-badge.offline .status-dot { background: var(--muted2); }
+    .team-fields { display: flex; flex-direction: column; gap: 10px; }
+    .team-field { display: flex; flex-direction: column; gap: 2px; }
+    .team-field-label {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: var(--muted2);
+    }
+    .team-field-value { font-size: 12px; color: var(--text); line-height: 1.4; }
+    .team-field-value.task {
       color: var(--muted);
-      line-height: 1.45;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
     }
+    .team-field-value.model { font-family: monospace; font-size: 11px; color: var(--accent2); }
+    .team-field-value.tokens { color: var(--blue); font-variant-numeric: tabular-nums; font-weight: 500; }
 
     /* ── Responsive ── */
     @media (max-width: 900px) {
@@ -852,11 +908,11 @@
 // CONFIG
 // ─────────────────────────────────────────────
 const AGENTS = [
-  { name: 'neil',     role: 'Lead PM',       emoji: '🌌', desc: 'Orchestrates the team, owns product decisions, sole interface to Tony.' },
-  { name: 'megamind', role: 'Architect/Dev', emoji: '🧠', desc: 'Builds and ships code — dashboards, features, infrastructure.' },
-  { name: 'picasso',  role: 'UI/UX Design',  emoji: '🎨', desc: 'Owns visual design and user experience decisions.' },
-  { name: 'margo',    role: 'Research/Risk', emoji: '📊', desc: 'Investigates unknowns, assesses risk, surfaces blind spots.' },
-  { name: 'homer',    role: 'QA/Testing',    emoji: '🔍', desc: 'Runs QA passes, regression suites, and flags defects.' },
+  { name: 'neil',     role: 'Lead PM',       emoji: '🌌', desc: 'Orchestrates the team, owns product decisions, sole interface to Tony.', avatar: 'https://cdn.discordapp.com/avatars/1496367229124612196/c7bcbb00faddd861ecb56c36bc0313c7.png', model: 'claude-sonnet-4-6' },
+  { name: 'megamind', role: 'Architect/Dev', emoji: '🧠', desc: 'Builds and ships code — dashboards, features, infrastructure.',          avatar: 'https://cdn.discordapp.com/avatars/1496384933495701566/5648c71a1a4c44a261bd3dfd74a459b5.png', model: 'claude-sonnet-4-6' },
+  { name: 'picasso',  role: 'UI/UX Design',  emoji: '🎨', desc: 'Owns visual design and user experience decisions.',                       avatar: 'https://cdn.discordapp.com/avatars/1496574015857496115/ce636fd103a7cd0d5237f57faf6104d0.png', model: 'gemini/figma' },
+  { name: 'margo',    role: 'Research/Risk', emoji: '📊', desc: 'Investigates unknowns, assesses risk, surfaces blind spots.',             avatar: 'https://cdn.discordapp.com/avatars/1496573415086096454/a95a24a49dd1d5e84b44dfc3c0ecbdde.png', model: 'claude-sonnet-4-6' },
+  { name: 'homer',    role: 'QA/Testing',    emoji: '🔍', desc: 'Runs QA passes, regression suites, and flags defects.',                   avatar: 'https://cdn.discordapp.com/avatars/1496574598307909815/f1a7b4d3b5ed8d7d1e4a0f3e8e7c6b5a.png', model: 'claude-sonnet-4-6' },
 ];
 
 // ─────────────────────────────────────────────
@@ -1351,20 +1407,67 @@ function renderTodo() {
 // ─────────────────────────────────────────────
 function renderTeam() {
   const grid = document.getElementById('team-grid');
+  const now = Date.now();
+  const TEN_MIN  = 600000;
+  const ONE_HOUR = 3600000;
+  const SEVEN_DAYS = 7 * 24 * ONE_HOUR;
+
   grid.innerHTML = AGENTS.map(a => {
-    const latest = lastActiveForAgent(a.name);
-    const lastActive = latest ? timeAgo(latest.timestamp) : 'never';
-    const isActive = latest ? (Date.now() - new Date(latest.timestamp)) < 3600000 : false;
+    const entries = getAgentLog(a.name);
+    const sorted  = [...entries].sort((x,y) => new Date(y.timestamp) - new Date(x.timestamp));
+    const latest  = sorted[0] || null;
+
+    // Status
+    let statusClass, statusLabel;
+    if (latest) {
+      const age = now - new Date(latest.timestamp);
+      if (age < TEN_MIN)  { statusClass = 'working'; statusLabel = 'Working'; }
+      else if (age < ONE_HOUR) { statusClass = 'online';  statusLabel = 'Online'; }
+      else                { statusClass = 'offline'; statusLabel = 'Offline'; }
+    } else {
+      statusClass = 'offline'; statusLabel = 'Offline';
+    }
+
+    // Current task
+    let currentTask = 'Idle';
+    if (latest && (now - new Date(latest.timestamp)) < ONE_HOUR) {
+      const raw = latest.detail || latest.action || '';
+      currentTask = raw.length > 100 ? raw.substring(0, 100) + '…' : (raw || 'Idle');
+    }
+
+    // 7-day tokens
+    const tokens7d = entries
+      .filter(e => (now - new Date(e.timestamp)) < SEVEN_DAYS)
+      .reduce((s, e) => s + (e.tokens_used || 0), 0);
+
+    // Avatar with emoji fallback
+    const avatarHtml = a.avatar
+      ? `<img class="team-avatar-img" src="${a.avatar}" alt="${a.name}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="team-avatar-fallback" style="display:none">${a.emoji}</div>`
+      : `<div class="team-avatar-fallback">${a.emoji}</div>`;
+
     return `<div class="team-card">
-      <div class="team-card-top">
-        <div class="team-avatar">${a.emoji}</div>
-        <div class="team-info">
+      <div class="team-card-header">
+        <div class="team-avatar-wrap">${avatarHtml}</div>
+        <div class="team-name-block">
           <div class="team-name">${a.name}</div>
           <div class="team-role">${a.role}</div>
         </div>
+        <span class="team-status-badge ${statusClass}"><span class="status-dot"></span>${statusLabel}</span>
       </div>
-      <div class="team-last-active">last active: ${lastActive}</div>
-      <div class="team-desc">${a.desc}</div>
+      <div class="team-fields">
+        <div class="team-field">
+          <div class="team-field-label">Current Task</div>
+          <div class="team-field-value task">${currentTask}</div>
+        </div>
+        <div class="team-field">
+          <div class="team-field-label">Model</div>
+          <div class="team-field-value model">${a.model}</div>
+        </div>
+        <div class="team-field">
+          <div class="team-field-label">7-Day Tokens</div>
+          <div class="team-field-value tokens">${tokens7d.toLocaleString()}</div>
+        </div>
+      </div>
     </div>`;
   }).join('');
 }
